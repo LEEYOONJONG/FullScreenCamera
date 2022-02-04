@@ -1,0 +1,198 @@
+import UIKit
+import AVFoundation
+import Photos
+
+class CameraViewController: UIViewController {
+    
+    let captureSession = AVCaptureSession()
+    var videoDeviceInput:AVCaptureDeviceInput!
+    let photoOutput = AVCapturePhotoOutput()
+    
+    let sessionQueue = DispatchQueue(label: "session Queue")
+    let videoDeviceDiscoverySession = AVCaptureDevice.DiscoverySession(
+        deviceTypes: [.builtInDualCamera, .builtInTripleCamera, .builtInWideAngleCamera, .builtInTrueDepthCamera],
+        mediaType: .video,
+        position: .unspecified
+    )
+    
+    @IBOutlet weak var photoLibraryButton: UIButton!
+    @IBOutlet weak var previewView: PreviewView!
+    @IBOutlet weak var captureButton: UIButton!
+    @IBOutlet weak var blurBGView: UIVisualEffectView!
+    @IBOutlet weak var switchButton: UIButton!
+    
+    override var prefersStatusBarHidden: Bool{
+        return true
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        previewView.session = captureSession
+        sessionQueue.async {
+            self.setupSession()
+            self.startSession()
+        }
+        setupUI()
+        
+    }
+    @IBAction func switchCamera(_ sender: Any) {
+        guard videoDeviceDiscoverySession.devices.count > 1 else { return }
+        
+        sessionQueue.async {
+            let currentVideoDevice = self.videoDeviceInput.device
+            let currentPosition = currentVideoDevice.position
+            let isFront = currentPosition == .front
+            let preferredPosition:AVCaptureDevice.Position = isFront ? .back : .front
+            let devices = self.videoDeviceDiscoverySession.devices
+            var newVideoDevice:AVCaptureDevice?
+            newVideoDevice = devices.first(where: {device in
+                return preferredPosition == device.position
+            })
+            
+            // update capture session
+            if let newDevice = newVideoDevice {
+                do {
+                    let videoDeviceInput = try AVCaptureDeviceInput(device: newDevice)
+                    self.captureSession.beginConfiguration()
+                    self.captureSession.removeInput(self.videoDeviceInput)
+                    
+                    // add new device input
+                    if self.captureSession.canAddInput(videoDeviceInput){
+                        self.captureSession.addInput(videoDeviceInput)
+                        self.videoDeviceInput = videoDeviceInput
+                    } else {
+                        self.captureSession.addInput(self.videoDeviceInput)
+                    }
+                    self.captureSession.commitConfiguration()
+                    
+                    DispatchQueue.main.async {
+                        self.updateSwitchCameraIcon(position: preferredPosition)
+                    }
+                    
+                } catch let error{
+                    print("error : \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    @IBAction func capturePhoto(_ sender: Any) {
+        let videoPreviewLayerOrientation = self.previewView.videoPreviewLayer.connection?.videoOrientation
+        sessionQueue.async {
+            let connection = self.photoOutput.connection(with: .video)
+            connection?.videoOrientation = videoPreviewLayerOrientation!
+            
+            let setting = AVCapturePhotoSettings()
+            self.photoOutput.capturePhoto(with: setting, delegate: self)
+        }
+    }
+    func setupUI(){
+        photoLibraryButton.layer.cornerRadius = 10
+        photoLibraryButton.layer.masksToBounds = true
+        photoLibraryButton.layer.borderColor = UIColor.white.cgColor // white
+        photoLibraryButton.layer.borderWidth = 1
+        captureButton.layer.cornerRadius = captureButton.bounds.height/2 // 동그랗게
+        captureButton.layer.masksToBounds = true
+        blurBGView.layer.cornerRadius = blurBGView.bounds.height/2 // 동그랗게
+        blurBGView.layer.masksToBounds = true
+    }
+    
+}
+
+extension CameraViewController{
+    func setupSession(){
+        // preset to photo
+        captureSession.sessionPreset = .photo
+        captureSession.beginConfiguration()
+        
+        // add video input
+        
+        guard let camera = videoDeviceDiscoverySession.devices.first else{
+            captureSession.commitConfiguration()
+            return
+        }
+        do {
+            let videoDeviceInput = try AVCaptureDeviceInput(device: camera) // ??? 변수 이미 있는데
+            if captureSession.canAddInput(videoDeviceInput) {
+                captureSession.addInput(videoDeviceInput)
+                self.videoDeviceInput = videoDeviceInput
+            } else {
+                captureSession.commitConfiguration()
+                return
+            }
+        } catch let error{
+            captureSession.commitConfiguration()
+            return
+        }
+        
+        // add output
+        photoOutput.setPreparedPhotoSettingsArray([AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])], completionHandler: nil)
+        
+        if captureSession.canAddOutput(photoOutput){
+            captureSession.addOutput(photoOutput)
+        } else {
+            captureSession.commitConfiguration()
+            return
+        }
+        
+        // 종료
+        captureSession.commitConfiguration()
+    }
+    func startSession(){
+        sessionQueue.async {
+            if !self.captureSession.isRunning{
+                self.captureSession.startRunning()
+            }
+        }
+    }
+    func stopSession(){
+        sessionQueue.async {
+            if self.captureSession.isRunning{
+                self.captureSession.stopRunning()
+            }
+        }
+    }
+    func updateSwitchCameraIcon(position: AVCaptureDevice.Position){
+        switch position{
+        case .front:
+            let image = UIImage(systemName: "pencil")
+            switchButton.setImage(image, for: .normal)
+            
+        case .back:
+            let image = UIImage(systemName: "highlighter")
+            switchButton.setImage(image, for: .normal)
+        default:
+            break
+        }
+    }
+}
+extension CameraViewController:AVCapturePhotoCaptureDelegate{
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        guard error == nil else { return}
+        guard let imageData = photo.fileDataRepresentation() else {return }
+        guard let image = UIImage(data: imageData) else { return }
+        self.savePhotoLibrary(image: image)
+        self.imageToBase64(image: image)
+    }
+    
+    func savePhotoLibrary(image: UIImage){
+        PHPhotoLibrary.requestAuthorization{ status in
+            if status == .authorized {
+                PHPhotoLibrary.shared().performChanges({
+                    PHAssetChangeRequest.creationRequestForAsset(from: image)
+                }){( success, error) in
+//                    print("--> 이미지 저장 완료되었나? \(success)")
+                }
+            } else {
+                print("-> 권한을 아직 받지 못함")
+                
+            }
+        }
+    }
+    func imageToBase64(image: UIImage){
+//        print("imageToBase64 : ")
+        let imageData:NSData = image.jpegData(compressionQuality: 0.1)! as NSData
+        let strBase64 = imageData.base64EncodedString(options: .lineLength64Characters)
+        print(strBase64)
+    }
+}
+
