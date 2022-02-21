@@ -35,6 +35,7 @@ class CameraViewController: UIViewController {
             self.startSession()
         }
         setupUI()
+       
         
         // 주기적 캡처를 위해
         self.timer = DispatchSource.makeTimerSource(flags: [], queue: .main)
@@ -52,6 +53,29 @@ class CameraViewController: UIViewController {
         self.timer?.resume()
     }
     @IBAction func switchCamera(_ sender: Any) {
+        switchCamera()
+    }
+    @IBAction func capturePhoto(_ sender: Any) {
+        let videoPreviewLayerOrientation = self.previewView.videoPreviewLayer.connection?.videoOrientation
+        sessionQueue.async {
+            let connection = self.photoOutput.connection(with: .video)
+            connection?.videoOrientation = videoPreviewLayerOrientation!
+            
+            let setting = AVCapturePhotoSettings()
+            self.photoOutput.capturePhoto(with: setting, delegate: self)
+        }
+    }
+    func setupUI(){
+        photoLibraryButton.layer.cornerRadius = 10
+        photoLibraryButton.layer.masksToBounds = true
+        photoLibraryButton.layer.borderColor = UIColor.white.cgColor // white
+        photoLibraryButton.layer.borderWidth = 1
+        captureButton.layer.cornerRadius = captureButton.bounds.height/2 // 동그랗게
+        captureButton.layer.masksToBounds = true
+        blurBGView.layer.cornerRadius = blurBGView.bounds.height/2 // 동그랗게
+        blurBGView.layer.masksToBounds = true
+    }
+    func switchCamera(){
         guard videoDeviceDiscoverySession.devices.count > 1 else { return }
         
         sessionQueue.async {
@@ -91,27 +115,6 @@ class CameraViewController: UIViewController {
             }
         }
     }
-    @IBAction func capturePhoto(_ sender: Any) {
-        let videoPreviewLayerOrientation = self.previewView.videoPreviewLayer.connection?.videoOrientation
-        sessionQueue.async {
-            let connection = self.photoOutput.connection(with: .video)
-            connection?.videoOrientation = videoPreviewLayerOrientation!
-            
-            let setting = AVCapturePhotoSettings()
-            self.photoOutput.capturePhoto(with: setting, delegate: self)
-        }
-    }
-    func setupUI(){
-        photoLibraryButton.layer.cornerRadius = 10
-        photoLibraryButton.layer.masksToBounds = true
-        photoLibraryButton.layer.borderColor = UIColor.white.cgColor // white
-        photoLibraryButton.layer.borderWidth = 1
-        captureButton.layer.cornerRadius = captureButton.bounds.height/2 // 동그랗게
-        captureButton.layer.masksToBounds = true
-        blurBGView.layer.cornerRadius = blurBGView.bounds.height/2 // 동그랗게
-        blurBGView.layer.masksToBounds = true
-    }
-    
 }
 
 extension CameraViewController{
@@ -131,6 +134,14 @@ extension CameraViewController{
             if captureSession.canAddInput(videoDeviceInput) {
                 captureSession.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
+                // 실행하면 전면 카메라로 자동으로 전환
+                let currentVideoDevice = self.videoDeviceInput.device
+                let currentPosition = currentVideoDevice.position
+                let isFront = currentPosition == .front
+                if !isFront {
+                    switchCamera()
+                }
+                
             } else {
                 captureSession.commitConfiguration()
                 return
@@ -139,6 +150,7 @@ extension CameraViewController{
             captureSession.commitConfiguration()
             return
         }
+        
         
         // add output
         photoOutput.setPreparedPhotoSettingsArray([AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])], completionHandler: nil)
@@ -206,8 +218,8 @@ extension CameraViewController:AVCapturePhotoCaptureDelegate{
     }
     func imageToBase64(image: UIImage){
 //        print("imageToBase64 : ")
-        let imageData:NSData = image.jpegData(compressionQuality: 0.01)! as NSData
-        let strBase64 = imageData.base64EncodedString(options: .lineLength64Characters)
+        let imageData:NSData = image.jpegData(compressionQuality: 0)! as NSData
+        let strBase64 = imageData.base64EncodedString()
         print(strBase64)
         print()
         print()

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D0E50462D4BD2C1B062D03F /* Pods_FullScreenCamera_self.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 17BD8C64C37A91A535A5B983 /* Pods_FullScreenCamera_self.framework */; };
 		98CFB25F27A82CEA00D4437F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CFB25E27A82CEA00D4437F /* AppDelegate.swift */; };
 		98CFB26127A82CEA00D4437F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CFB26027A82CEA00D4437F /* SceneDelegate.swift */; };
 		98CFB26627A82CEA00D4437F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 98CFB26427A82CEA00D4437F /* Main.storyboard */; };
@@ -17,6 +18,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1274E4A1A53AF0A225DD847D /* Pods-FullScreenCamera_self.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FullScreenCamera_self.debug.xcconfig"; path = "Target Support Files/Pods-FullScreenCamera_self/Pods-FullScreenCamera_self.debug.xcconfig"; sourceTree = "<group>"; };
+		17BD8C64C37A91A535A5B983 /* Pods_FullScreenCamera_self.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FullScreenCamera_self.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A55EC03C1760877CCE72628 /* Pods-FullScreenCamera_self.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FullScreenCamera_self.release.xcconfig"; path = "Target Support Files/Pods-FullScreenCamera_self/Pods-FullScreenCamera_self.release.xcconfig"; sourceTree = "<group>"; };
 		98CFB25B27A82CEA00D4437F /* FullScreenCamera_self.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FullScreenCamera_self.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98CFB25E27A82CEA00D4437F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		98CFB26027A82CEA00D4437F /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -33,17 +37,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D0E50462D4BD2C1B062D03F /* Pods_FullScreenCamera_self.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		17F9E2156866A3F9A2C49A7B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				17BD8C64C37A91A535A5B983 /* Pods_FullScreenCamera_self.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		98CFB25227A82CEA00D4437F = {
 			isa = PBXGroup;
 			children = (
 				98CFB25D27A82CEA00D4437F /* FullScreenCamera_self */,
 				98CFB25C27A82CEA00D4437F /* Products */,
+				E02C29D9E33990DC7664011B /* Pods */,
+				17F9E2156866A3F9A2C49A7B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -70,6 +85,16 @@
 			path = FullScreenCamera_self;
 			sourceTree = "<group>";
 		};
+		E02C29D9E33990DC7664011B /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1274E4A1A53AF0A225DD847D /* Pods-FullScreenCamera_self.debug.xcconfig */,
+				2A55EC03C1760877CCE72628 /* Pods-FullScreenCamera_self.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -77,9 +102,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 98CFB26F27A82CEC00D4437F /* Build configuration list for PBXNativeTarget "FullScreenCamera_self" */;
 			buildPhases = (
+				4B2BF8660E8E24BFE7C9EE2E /* [CP] Check Pods Manifest.lock */,
 				98CFB25727A82CEA00D4437F /* Sources */,
 				98CFB25827A82CEA00D4437F /* Frameworks */,
 				98CFB25927A82CEA00D4437F /* Resources */,
+				431BFCFC42CEDC2CE4693C07 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -135,6 +162,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		431BFCFC42CEDC2CE4693C07 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FullScreenCamera_self/Pods-FullScreenCamera_self-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FullScreenCamera_self/Pods-FullScreenCamera_self-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FullScreenCamera_self/Pods-FullScreenCamera_self-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4B2BF8660E8E24BFE7C9EE2E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-FullScreenCamera_self-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		98CFB25727A82CEA00D4437F /* Sources */ = {
@@ -288,6 +357,7 @@
 		};
 		98CFB27027A82CEC00D4437F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1274E4A1A53AF0A225DD847D /* Pods-FullScreenCamera_self.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -316,6 +386,7 @@
 		};
 		98CFB27127A82CEC00D4437F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A55EC03C1760877CCE72628 /* Pods-FullScreenCamera_self.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
