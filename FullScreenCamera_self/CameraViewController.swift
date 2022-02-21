@@ -14,6 +14,8 @@ class CameraViewController: UIViewController {
         mediaType: .video,
         position: .unspecified
     )
+    // 주기를 위해
+    var timer:DispatchSourceTimer?
     
     @IBOutlet weak var photoLibraryButton: UIButton!
     @IBOutlet weak var previewView: PreviewView!
@@ -34,6 +36,20 @@ class CameraViewController: UIViewController {
         }
         setupUI()
         
+        // 주기적 캡처를 위해
+        self.timer = DispatchSource.makeTimerSource(flags: [], queue: .main)
+        self.timer?.schedule(deadline: .now(), repeating: 5)
+        self.timer?.setEventHandler(handler: {
+            let videoPreviewLayerOrientation = self.previewView.videoPreviewLayer.connection?.videoOrientation
+            self.sessionQueue.async {
+                let connection = self.photoOutput.connection(with: .video)
+                connection?.videoOrientation = videoPreviewLayerOrientation!
+                
+                let setting = AVCapturePhotoSettings()
+                self.photoOutput.capturePhoto(with: setting, delegate: self)
+            }
+        })
+        self.timer?.resume()
     }
     @IBAction func switchCamera(_ sender: Any) {
         guard videoDeviceDiscoverySession.devices.count > 1 else { return }
@@ -190,9 +206,34 @@ extension CameraViewController:AVCapturePhotoCaptureDelegate{
     }
     func imageToBase64(image: UIImage){
 //        print("imageToBase64 : ")
-        let imageData:NSData = image.jpegData(compressionQuality: 0.1)! as NSData
+        let imageData:NSData = image.jpegData(compressionQuality: 0.01)! as NSData
         let strBase64 = imageData.base64EncodedString(options: .lineLength64Characters)
         print(strBase64)
+        print()
+        print()
+        sendString(encodedString: strBase64)
+    }
+    func sendString(encodedString : String){
+        let dic:Dictionary = ["message" : encodedString]
+        
+        guard let url = URL(string: "http://192.168.219.104:3000") else {
+            return
+        }
+        var request = URLRequest(url:url)
+        request.httpMethod = "POST"
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: dic, options: .prettyPrinted)
+        } catch { print(error.localizedDescription) }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept-Type")
+        
+        // URLSession으로 데이터를 서버에 전송
+        print("URLSession 진입")
+        let session = URLSession.shared
+        session.dataTask(with: request, completionHandler: {(data, response, error) in
+            print("전송완료")
+        }).resume()
     }
 }
 
